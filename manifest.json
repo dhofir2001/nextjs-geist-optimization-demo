@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Dream Machine Auto-Prompt Generator",
+  "version": "1.0",
+  "description": "Automatically generate and submit prompt text on https://dream-machine.lumalabs.ai/board/new.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://dream-machine.lumalabs.ai/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://dream-machine.lumalabs.ai/board/new*"],
+      "js": ["content.js"]
+    }
+  ]
+}
