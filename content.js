@@ -28,6 +28,9 @@ const waitForElement = (selector, timeout = 5000) => {
     });
 };
 
+// Function to wait for a specified time
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Function to inject text into the Slate editor
 const injectPromptText = async (text) => {
     try {
@@ -42,8 +45,16 @@ const injectPromptText = async (text) => {
         const placeholderSpan = editorElement.querySelector('span[data-slate-placeholder]');
         
         if (placeholderSpan) {
-            // Replace the placeholder with our text
-            placeholderSpan.parentElement.innerHTML = text;
+            // Clear any existing text first
+            placeholderSpan.parentElement.innerHTML = '';
+            await wait(100); // Small delay after clearing
+            
+            // Type the text character by character for a more natural feel
+            const chars = text.split('');
+            for (const char of chars) {
+                placeholderSpan.parentElement.innerHTML += char;
+                await wait(50); // 50ms delay between characters
+            }
             
             // Dispatch input event to ensure Slate updates
             const inputEvent = new Event('input', { bubbles: true });
@@ -72,6 +83,8 @@ const clickSubmitButton = async () => {
         
         if (submitButton) {
             submitButton.click();
+            // Wait for submission to complete
+            await wait(1500);
             return true;
         }
         
@@ -92,14 +105,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     throw new Error('Please sign in to Dream Machine first');
                 }
 
-                // First inject the prompt text
+                // First inject the prompt text with typing animation
                 await injectPromptText(request.prompt);
                 
-                // Wait a short moment to ensure the text is properly set
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Wait a moment after typing
+                await wait(500);
                 
                 // Then click the submit button
                 await clickSubmitButton();
+                
+                // Wait after submission before processing next prompt
+                await wait(1000);
                 
                 sendResponse({ success: true });
             } catch (error) {
